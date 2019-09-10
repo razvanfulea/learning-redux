@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CourseService } from './course.service';
 import { Course } from './course';
 import { FilterTextComponent, FilterService } from '../blocks/filter-text';
+import { store } from '../store';
 
 @Component({
   selector: 'app-course-list',
@@ -27,8 +28,17 @@ export class CourseListComponent implements OnInit {
       });
   }
 
+  updateFromState() {
+    const allState = store.getState();
+    this.courses = allState.courses;
+    this.filteredCourses = allState.courses;
+  }
+
   ngOnInit() {
-    this.getCourses();
+    this.updateFromState();
+    store.subscribe(() => {
+      this.updateFromState();
+    });
     componentHandler.upgradeDom();
   }
 }
