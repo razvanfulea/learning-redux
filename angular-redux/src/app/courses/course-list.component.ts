@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CourseService } from './course.service';
 import { Course } from './course';
-import { FilterTextComponent, FilterService } from '../blocks/filter-text';
-import { store } from '../store';
+import { select } from 'ng2-redux';
+import { Observable } from 'rxjs';
+import { CourseActions } from './course.actions';
 
 @Component({
   selector: 'app-course-list',
@@ -11,34 +11,19 @@ import { store } from '../store';
 })
 export class CourseListComponent implements OnInit {
   courses: Course[];
-  filteredCourses = this.courses;
+  @select('filteredCourses') filteredCourses$: Observable<Course>;
 
-  constructor(private _courseService: CourseService, private _filterService: FilterService) {
-  }
+  constructor(
+    private courseActions: CourseActions
+  ) {}
 
   filterChanged(searchText: string) {
     console.log('user searched: ', searchText);
-    this.filteredCourses = this._filterService.filter(searchText, ['id', 'name', 'topic'], this.courses);
-  }
-
-  getCourses() {
-    this._courseService.getCourses()
-      .subscribe(courses => {
-        this.courses = this.filteredCourses = courses;
-      });
-  }
-
-  updateFromState() {
-    const allState = store.getState();
-    this.courses = allState.courses;
-    this.filteredCourses = allState.courses;
+    this.courseActions.filterCourses(searchText);
   }
 
   ngOnInit() {
-    this.updateFromState();
-    store.subscribe(() => {
-      this.updateFromState();
-    });
+    this.courseActions.getCourses();
     componentHandler.upgradeDom();
   }
 }
